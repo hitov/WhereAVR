@@ -20,5 +20,5 @@ extern void ax25sendByte(unsigned char inbyte);
 extern void ax25crcBit(int txbyte);
 
 extern void ax25sendASCIIebyte(unsigned short value);
-extern void ax25sendString(char *szString);
+extern void ax25sendString(unsigned char *szString);
 extern void ax25sendEEPROMString(unsigned int address);

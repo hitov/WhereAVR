@@ -26,7 +26,6 @@ Copyright:	(c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <avr/signal.h>
 
 // General purpose include files
 #include "StdDefines.h"

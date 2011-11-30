@@ -4,7 +4,7 @@ File:			Serial.c
 				Serial I/O subsystem function library.
 
 Functions:	extern void		SerInit(void)
-				extern void		SendByte(unsigned char chr)
+				extern void	SendByte(unsigned char chr)
 				extern void 	SendString(char *address)
 				extern void 	Serial_Processes(void)
 				SIGNAL(SIG_UART_RECV)
@@ -25,7 +25,7 @@ Copyright:	(c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
 
 // OS headers
 #include <avr/io.h>
-#include <avr/signal.h>
+#include <avr/interrupt.h>
 
 // General purpose include files
 #include "StdDefines.h"

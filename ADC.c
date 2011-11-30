@@ -19,7 +19,7 @@ Copyright:	(c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
 
 // OS headers
 #include <avr/io.h>
-#include <avr/signal.h>
+#include <avr/interrupt.h>
 
 // App required include files
 #include	"ADC.h"

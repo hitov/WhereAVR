@@ -289,7 +289,7 @@ extern void ax25sendASCIIebyte(unsigned short value)
 
 
 /******************************************************************************/
-extern void ax25sendString(char *address)
+extern void ax25sendString(unsigned char *address)
 /*******************************************************************************
 * ABSTRACT:	This function sends a null-terminated string to the packet
 *
