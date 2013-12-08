@@ -143,8 +143,8 @@ extern void ax25sendHeader(void)
 	ax25sendByte(0xF0);						// Protocol ID - 0xF0 is no layer 3
 */
 
-//	ax25sendEEPROMString(0);				// Send the header for use on 144.39 MHz
-	ax25sendEEPROMString(31);				// Trimmed header for use in 144.34 MHz
+	ax25sendEEPROMString(0);				// Send the header for use on 144.39 MHz
+//	ax25sendEEPROMString(31);				// Trimmed header for use in 144.34 MHz
 	return;
 
 }		// End ax25sendHeader(void)

@@ -69,6 +69,9 @@ volatile char busy;							// Carrier detect of sorts
 
 pll_dev_t pll;                              //PLL device
 
+
+uint8_t  EEMEM AX25EEPROMHeader[] = APRS_HEADER;
+
 /******************************************************************************/
 extern int	main(void)
 /*******************************************************************************

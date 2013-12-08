@@ -76,6 +76,70 @@
 #define APRS_FSK_SINE_TABLE           {15, 20, 25, 28, 30, 28, 25, 20, 15, 9, 4, 1, 0, 1, 4, 9}
 
 
+/*      * * * THIS IS WHERE THE CALLSIGNS ARE DETERMINED * * *
+    Each callsign character is shifted to use the high seven bits of the byte.
+    Use the table below to determine the hex values for these characters.
+    For callsigns less than six digits, pad the end of the callsign with spaces.
+    For all bytes in header, except for the very last byte, bit0 must be clear.
+    Yes, this means only the very last byte has bit0 set to 1 in the Station ID!
+
+        Callsign byte lookup table
+         -----------------------------------------------------------
+        | Letters:                    |   Numbers and SSID's:       |
+        | A = 0x82       N = 0x9C     |   0 = 0x60       8 = 0x70   |
+        | B = 0x84       O = 0x9E     |   1 = 0x62       9 = 0x72   |
+        | C = 0x86       P = 0xA0     |   2 = 0x64       10 = 0x74  |
+        | D = 0x88       Q = 0xA2     |   3 = 0x66       11 = 0x76  |
+        | E = 0x8A       R = 0xA4     |   4 = 0x68       12 = 0x78  |
+        | F = 0x8C       S = 0xA6     |   5 = 0x6A       13 = 0x7A  |
+        | G = 0x8E       T = 0xA8     |   6 = 0x6C       14 = 0x7C  |
+        | H = 0x90       U = 0xAA     |   7 = 0x6E       15 = 0x7E  |
+        | I = 0x92       V = 0xAC     |   Space = 0x40              |
+        | J = 0x94       W = 0xAE     |                             |
+        | K = 0x96       X = 0xB0     |   REMEMBER!  Set bit0 in    |
+        | L = 0x98       Y = 0xB2     |   the last SSID to one!     |
+        | M = 0x9A       Z = 0xB4     |                             |
+         -----------------------------------------------------------
+        End of lookup table */
+
+#define APRS_HEADER \
+{ \
+    /* Begin transmission of packet destination address (APxxxx0)*/ \
+    0x82, /* A */ \
+    0xA0, /* P */ \
+    0x82, /* A */ \
+    0xAC, /* V */ \
+    0xA4, /* R */ \
+    0x60, /* 0 */ \
+    0x60, /* SSID=0 */ \
+    /* Begin transmission of packet source address */ \
+    0x98, /* Byte 1 (L) */ \
+    0xB4, /* Byte 2 (Z) */ \
+    0x62, /* Byte 3 (1) */ \
+    0x82, /* Byte 4 (A) */ \
+    0xA4, /* Byte 5 (R) */ \
+    0x9A, /* Byte 6 (M) */ \
+    0x76, /* Station ID (11) */ \
+    \
+    0xA4, /* Byte 1 (R) */ \
+    0x8A, /* Byte 2 (E) */ \
+    0x98, /* Byte 3 (L) */ \
+    0x82, /* Byte 4 (A) */ \
+    0xB2, /* Byte 5 (Y) */ \
+    0x40, /* Byte 6 (Space) */ \
+    0x60, /* Station ID (0) */ \
+                               \
+    0xAE, /* Byte 1 (W) */ \
+    0x92, /* Byte 2 (I) */ \
+    0x88, /* Byte 3 (D) */ \
+    0x8A, /* Byte 4 (E) */ \
+    0x64, /* Byte 5 (2) */ \
+    0x40, /* Byte 6 (Space) */ \
+    0x65, /* Station ID (2) */ \
+    /* Finish out the header with two more bytes */ \
+    0x03, /* Control field - 0x03 is APRS UI-frame */ \
+    0xF0  /* Protocol ID - 0xF0 is no layer 3 */ \
+}
 
 #else
 #define LM7001_PLL_ENABLE_OUTPUT()
