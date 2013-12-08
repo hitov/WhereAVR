@@ -43,6 +43,13 @@ Copyright:	(c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
 #include "Messaging.h"
 #include "Serial.h"
 
+//Board hardware descriptions
+#include "board.h"
+
+//PLL definitions
+#include "pll.h"
+
+
 #define	RXSIZE (256)
 
 #define	WatchdogReset() asm("wdr")		// Macro substitution to kick the dog
@@ -59,6 +66,8 @@ static unsigned char	rxtoggled;			// Signals frequency just toggled
 static unsigned short crc;					// Current checksum for incoming message
 static unsigned short dcd;					// Carrier detect of sorts
 volatile char busy;							// Carrier detect of sorts
+
+pll_dev_t pll;                              //PLL device
 
 /******************************************************************************/
 extern int	main(void)
@@ -79,25 +88,29 @@ extern int	main(void)
 	ADCInit();
 	SerInit();
 	MsgInit();
+	pll_init(&pll);
 
-	// PORT B - Sinewave Generation, and
-	//	Bit/Pin 5 (out) connected to a 1k ohm resistor
-	//	Bit/Pin 4 (out) connected to a 2k ohm resistor
-	//	Bit/Pin 3 (out) connected to a 3.9k ohm resistor
-	//	Bit/Pin 2 (out) connected to an 8.2k ohm resistor
-	//	Bit/Pin 1 (out) connected to the PTT circuitry
-	//	Bit/Pin 0 (out) DCD LED line
-	PORTB = 0x00;							// Initial state is everything off
-	DDRB  = 0x3F;							// Data direction register for port B
+	// PORT C - Sinewave Generation, and
+	//	Bit/Pin 0 (out) connected to a 1k ohm resistor
+	//	Bit/Pin 1 (out) connected to a 2k ohm resistor
+	//	Bit/Pin 2 (out) connected to a 3.9k ohm resistor
+	//	Bit/Pin 3 (out) connected to an 8.2k ohm resistor
 
+	APRS_FSK_OUTPUT();  					// Initial state is everything off
+	               							// Data direction register for port C
 	// PORT D - General use port
-	//	Bit/Pin 2 (out) connected the control line on a servo
-	PORTD = 0x00;							// Initial state is everything off
-	DDRD  = 0x04;							// Data direction register for port D
+	//
+	//PORTD = 0x00;							// Initial state is everything off
+	//DDRD  = 0x8F;							// Data direction register for port D
+
+	APRS_PTT_OUTPUT();
+	APRS_PTT_OFF();
+
+	GPS_RFPWR_ON();                         //Enable GPS RF Power
 
 	// Initialize the Analog Comparator
-	SFIOR = 0;								// Select AIN1 as neg. input
-	ACSR = (1<<ACBG) | (1<<ACIE);		// Select Bandgap for pos. input
+	//SFIOR = 0;								// Select AIN1 as neg. input
+	//ACSR = (1<<ACBG) | (1<<ACIE);		// Select Bandgap for pos. input
 
 	//	Initialize the 8-bit Timer0 to clock at 1.8432 MHz
 	TCCR0 = 0x02; 							// Timer0 clock prescale of 8
@@ -120,7 +133,7 @@ extern int	main(void)
 
 	// Reset watchdog
 	WatchdogReset();
-
+/*
 	// First move the servo to the starting position
 	for (servo_loop = 0 ; servo_loop < 200 ; servo_loop++)
 	{
@@ -133,7 +146,7 @@ extern int	main(void)
 		Delay(50);			// 18.0 ms between servo pulses
 		WatchdogReset();
 	}
-
+*/
 	// Initialization complete - system ready.  Run program loop indefinitely.
 	while (TRUE)
 	{
@@ -173,68 +186,7 @@ extern int	main(void)
 		for (loop = 0 ; loop < 3900 ; loop++)	// Wait a maximum of 30 seconds
 		{
 			Delay(112);									// Delay is 10ms with 112
-			if (msg_end)								// Meanwhile, if we get a packet
-			{
-				if (rxbytes[msg_start] == ':')		// Look for message character
-				if (rxbytes[msg_start + 1] == 'N')	// Look for my callsign
-				if (rxbytes[msg_start + 2] == '4')
-				if (rxbytes[msg_start + 3] == 'T')
-				if (rxbytes[msg_start + 4] == 'X')
-				if (rxbytes[msg_start + 5] == 'I')
-				if (rxbytes[msg_start + 6] == '-')
-				if (rxbytes[msg_start + 7] == '1')	// And my SSID
-				if (rxbytes[msg_start + 8] == '1')
-				if (rxbytes[msg_start + 9] == ' ')
-				if (rxbytes[msg_start + 10] == ':')
-				{
-					command = rxbytes[msg_start + 11];	// Grab command character
-					if (rxbytes[msg_start + 12] == '{')	// Sender expects acknowledge
-					{
-						Delay(250);				// Pause
-						Delay(250);
-						Delay(250);
-						Delay(250);
-						Delay(250);
-//						while(busy) Delay(250);			// Wait for clear channel
-						mainTransmit();						// Enable transmitter
-						MsgSendAck (rxbytes,msg_start);	// Send Ack text
-						mainReceive();							// Disable transmitter
-					}
 
-					if (command == 'P')
-					{
-						loop = 32766;			// Exit timeout loop to transmit
-					}
-
-					if (command == 'R')		// "R" means release
-					{
-						for (servo_loop = 0 ; servo_loop < 200 ; servo_loop++)
-						{
-							PORTD |= 0x04;		// servo signal on pin 4 PORT D2
-							Delay(32);			// latch released
-							PORTD &= ~0x04;
-							Delay(50);			// 18.0 ms between servo pulses
-						}
-
-					}
-
-					if (command == 'L')		// "L" means lock
-					{
-						for (servo_loop = 0 ; servo_loop < 200 ; servo_loop++)
-						{
-							PORTD |= 0x04;		// servo signal on pin 4 PORT D2
-							Delay(23);			// latch locked
-							PORTD &= ~0x04;
-							Delay(50);			// 18.0 ms between servo pulses
-						}
-
-					}
-
-				}		// end if (rxbytes[msg_start + 10] == ':')
-
-				msg_end = 0;					// Forget there was a message
-				ACSR |= (1<<ACIE);			// Re-enable the comparator
-			}		// end if (msg_end)
 
 			// The following condition is true once per second.
 			if (Time_Temp[5] != ones_seconds)	// Has ones digit changed?
@@ -280,6 +232,10 @@ extern void mainTransmit(void)
 	TCCR0 = 0x03; 								// Timer0 clock prescale of 64
 	TCCR1B = 0x02;								// Timer1 clock prescale of 8
 	TCCR2 = 0x02; 								// Timer2 clock prescale of 8
+
+	APRS_PTT_ON();                              // Enable TX
+	pll_set_freq(&pll, 144800000);              // Set PLL frequency in kHz
+
 	transmit = TRUE;							// Enable the transmitter
 	ax25sendHeader();							// Send APRS header
 	return;
@@ -299,7 +255,7 @@ extern void mainReceive(void)
 {
 	ax25sendFooter();							// Send APRS footer
 	transmit = FALSE;							// Disable transmitter
-	PORTB &= 0x3D;								// Make sure the transmitter is disabled
+	APRS_PTT_OFF();								// Make sure the transmitter is disabled
 	TCCR0 = 0x02; 								// Timer0 clock prescale of 8
 	TCCR1B = 0x02;								// Timer1 clock prescale of 8
 	TCCR2 = 0x07;								// Timer2 clock prescale of 1024
@@ -469,7 +425,7 @@ SIGNAL(SIG_OVERFLOW0)
 					{
 						if (last8bits == ((crc ^ 0xFF) & 0xFF)) // And see it?
 						{
-							PORTB |= 1;						// Turn on the DCD LED
+						    DCD_LED_ON();    //PORTB |= 1;						// Turn on the DCD LED
 							crchi = (crc >> 8)^0xFF;	// Preserve MSB of crc
 							crcstate = 1;					// Expect the MSB of crc next
 						}
@@ -506,7 +462,7 @@ SIGNAL(SIG_OVERFLOW0)
 		else
 		{
 			busy = FALSE;
-			PORTB &= 0x3E;						// Turn off the DCD LED
+			DCD_LED_OFF(); //PORTB &= 0x3E;						// Turn off the DCD LED
 		}		// end else for 'if (dcd)'
 
 	}		// end else for 'if (!(transmit))'
@@ -544,7 +500,8 @@ SIGNAL(SIG_OVERFLOW2)
 */
 {
 	// This line is for if you followed the schematic:
-	static char	sine[16] = {58,22,46,30,62,30,46,22,6,42,18,34,2,34,18,42};
+	static unsigned char sine[16] = APRS_FSK_SINE_TABLE;
+    //static char	sine[16] = {58,22,46,30,62,30,46,22,6,42,18,34,2,34,18,42};
 	// This line is for if you installed the resistors in backwards order :-) :
 //	static char	sine[16] = {30,42,54,58,62,58,54,42,34,22,10,6,2,6,10,22};
 	static unsigned char sine_index;		// Index for the D-to-A sequence
@@ -553,8 +510,8 @@ SIGNAL(SIG_OVERFLOW2)
 	{
 		++sine_index;							// Increment index
 		sine_index &= 15;						// And wrap to a max of 15
-		PORTB = sine[sine_index];			// Load next D-to-A sinewave value
-		TCNT2 = txtone;						// Preload counter based on freq.
+		APRS_FSK_PORT = sine[sine_index];		// Load next D-to-A sinewave value
+		TCNT2 = txtone;						    // Preload counter based on freq.
 	}
 	else
 	{

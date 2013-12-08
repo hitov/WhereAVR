@@ -7,6 +7,8 @@ OBJ            = Main.o \
 		 				ax25.o \
 		 				Serial.o \
 		 				Messaging.o \
+		 				lm7001.c \
+		 				pll.c \
 			
 MCU_TARGET     = atmega8
 OPTIMIZE       = -O2
