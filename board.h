@@ -140,7 +140,7 @@
     /* Finish out the header with two more bytes */ \
     0x03, /* Control field - 0x03 is APRS UI-frame */ \
     0xF0,  /* Protocol ID - 0xF0 is no layer 3 */ \
-	0x00  \
+    0x00  \
 }
 
 #else
