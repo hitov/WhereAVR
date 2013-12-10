@@ -111,6 +111,8 @@ extern int	main(void)
 
 	GPS_RFPWR_ON();                         //Enable GPS RF Power
 
+	DCD_LED_ENABLE_OUTPUT();
+
 	// Initialize the Analog Comparator
 	//SFIOR = 0;								// Select AIN1 as neg. input
 	//ACSR = (1<<ACBG) | (1<<ACIE);		// Select Bandgap for pos. input
@@ -188,9 +190,7 @@ extern int	main(void)
 
 		for (loop = 0 ; loop < 3900 ; loop++)	// Wait a maximum of 30 seconds
 		{
-			Delay(112);									// Delay is 10ms with 112
-
-
+		    Delay(112);                         // Delay is 10ms with 112
 			// The following condition is true once per second.
 			if (Time_Temp[5] != ones_seconds)	// Has ones digit changed?
 			{
@@ -208,7 +208,7 @@ extern int	main(void)
 				{
 					// do something else interesting
 				}
-
+				DCD_LED_TOGGLE();
 			}
 
 		}		// end for (loop = 0 ; loop < 3900 ; loop++)
@@ -262,7 +262,7 @@ extern void mainReceive(void)
 	TCCR0 = 0x02; 								// Timer0 clock prescale of 8
 	TCCR1B = 0x02;								// Timer1 clock prescale of 8
 	TCCR2 = 0x07;								// Timer2 clock prescale of 1024
-	ACSR |= (1<<ACIE);						// Re-enable the comparator
+	//ACSR |= (1<<ACIE);						// Re-enable the comparator
 	UCSRB |= (1<<RXCIE)|(1<<TXCIE);		// Re-enable the serial interrupts
 	MsgHandler(0);								// Reset the GPS decoding engine
 	return;

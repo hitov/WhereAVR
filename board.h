@@ -42,6 +42,7 @@
 #define DCD_LED_ENABLE_OUTPUT()       (DCD_LED_DDR  |=  (1 << DCD_LED_BIT))
 #define DCD_LED_ON()                  (DCD_LED_PORT &= ~(1 << DCD_LED_BIT))
 #define DCD_LED_OFF()                 (DCD_LED_PORT |=  (1 << DCD_LED_BIT))
+#define DCD_LED_TOGGLE()              (DCD_LED_PORT ^=  (1 << DCD_LED_BIT))
 
 
 #define GPS_RFPWR_DDR                 (DDRD)
@@ -138,7 +139,8 @@
     0x65, /* Station ID (2) */ \
     /* Finish out the header with two more bytes */ \
     0x03, /* Control field - 0x03 is APRS UI-frame */ \
-    0xF0  /* Protocol ID - 0xF0 is no layer 3 */ \
+    0xF0,  /* Protocol ID - 0xF0 is no layer 3 */ \
+	0x00  \
 }
 
 #else
