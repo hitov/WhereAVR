@@ -7,12 +7,20 @@ OBJ            = Main.o \
 		 				ax25.o \
 		 				Serial.o \
 		 				Messaging.o \
-			
+		 				lm7001.c \
+		 				pll.c \
+
 MCU_TARGET     = atmega8
 OPTIMIZE       = -O2
 
+PROGRAMMER     = usbasp
+PORT           = usb
+AVRDUDE_TARGET = m8
+
 DEFS           =
 LIBS           =
+
+HZ          = 14745600
 
 # You should not have to change anything below here.
 
@@ -20,7 +28,7 @@ CC             = avr-gcc
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS        = -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        = -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
 
 OBJCOPY        = avr-objcopy
@@ -94,4 +102,32 @@ pdf: $(PRG).pdf
 
 %.png: %.fig
 	$(FIG2DEV) -L png $< $@
+
+# command to program chip (invoked by running "make install")
+install:  $(PRG).hex $(PRG)_eeprom.hex
+	avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -P $(PORT) -v  \
+         -U flash:w:$(PRG).hex \
+         -U eeprom:w:$(PRG)_eeprom.hex
+
+fuse:
+	avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -P $(PORT) -v \
+	-U lfuse:w:0x1c:m -U hfuse:w:0xd9:m
+
+
+ddd: gdbinit
+	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
+
+gdbserver: gdbinit
+	simulavr --device $(MCU_TARGET) --gdbserver
+
+gdbinit: $(GDBINITFILE)
+
+$(GDBINITFILE): $(PRG).hex
+	@echo "file $(PRG).elf" > $(GDBINITFILE)
+
+	@echo "target remote localhost:1212" >> $(GDBINITFILE)
+	@echo "load"                         >> $(GDBINITFILE)
+	@echo "break main"                   >> $(GDBINITFILE)
+	@echo
+	@echo "Use 'avr-gdb -x $(GDBINITFILE)'"
 
