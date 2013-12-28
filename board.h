@@ -74,7 +74,7 @@
     //  Bit/Pin 1 (out) connected to a 2k ohm resistor
     //  Bit/Pin 2 (out) connected to a 3.9k ohm resistor
     //  Bit/Pin 3 (out) connected to an 8.2k ohm resistor
-#define APRS_FSK_SINE_TABLE           {15, 20, 25, 28, 30, 28, 25, 20, 15, 9, 4, 1, 0, 1, 4, 9}
+#define APRS_FSK_SINE_TABLE           {7, 10, 13, 14, 15, 14, 13, 10, 8, 5, 2, 1, 0, 1, 2, 5}
 
 
 /*      * * * THIS IS WHERE THE CALLSIGNS ARE DETERMINED * * *
