@@ -32,7 +32,7 @@ extern void        ADCInit(void)
 /*******************************************************************************
 * ABSTRACT:    Initializes the ADC control registers.
 *
-* INPUT:        None
+* INPUT:     None
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -53,7 +53,7 @@ extern unsigned short    ADCGet(unsigned char chan)
 * ABSTRACT:    This function reads the position of the to analog to digital
 *                converter channels.  Adc0 is
 *
-* INPUT:        chan    Channel to return the 8-bit analog value of.
+* INPUT:     chan    Channel to return the 8-bit analog value of.
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -69,7 +69,7 @@ SIGNAL(SIG_ADC)
 * ABSTRACT:    This function handles the ADC interrupt.  The Mux channel and
 *                array index are offset one channel due to the way the ADC works.
 *
-* INPUT:        None
+* INPUT:     None
 * OUTPUT:    None
 * RETURN:    None
 */

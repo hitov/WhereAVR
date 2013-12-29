@@ -11,7 +11,7 @@ Version:        1.04
 #define    SPACE (209)                         // 213 - works from 204 to 216 (2200 Hz.)
 
 // external variables
-unsigned char    txtone;                        // Used in main.c SIGNAL(SIG_OVERFLOW2)
+unsigned char    txtone;                      // Used in main.c SIGNAL(SIG_OVERFLOW2)
 
 // external function prototypes
 extern void ax25sendHeader(void);

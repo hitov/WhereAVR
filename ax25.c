@@ -1,9 +1,9 @@
 /*******************************************************************************
-File:            AX25.C
+File:           AX25.C
 
                 Routines for sending AX.25 Data.
 
-Functions:    extern void ax25sendHeader(void);
+Functions:      extern void ax25sendHeader(void);
                 extern void ax25sendFooter(void);
                 extern void ax25sendByte(char inbyte);
                 extern void ax25crcBit(int txbyte);
@@ -12,13 +12,13 @@ Functions:    extern void ax25sendHeader(void);
                 extern void ax25sendString(char *address);
                 extern void ax25sendEEPROMString(unsigned int address);
 
-Revisions:    1.00    11/03/01 JAH    Original - John Hansen / Zack Clobes
+Revisions:      1.00    11/03/01 JAH    Original - John Hansen / Zack Clobes
                 1.01    10/10/04    GND    Totally rewritten for AVR GNU GCC Compiler
                 1.02    11/02/04    GND    Optimized for reading header out of EEPROM
                 1.03    12/01/04    GND    Further optimized for tone generation
                 1.04    06/23/05    GND    Converted to C++ comment style
 
-Copyright:    (c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
+Copyright:      (c) 2005, Gary N. Dion (me@garydion.com). All rights reserved.
                 This software is available only for non-commercial amateur radio
                 or educational applications.  All other uses are prohibited.
                 This software may be modified only if the resulting code be
@@ -49,7 +49,7 @@ Copyright:    (c)2005, Gary N. Dion (me@garydion.com). All rights reserved.
 
 // Defines
 #define BIT_DELAY 189                    // Delay for 0.833 ms (189 for 14.7456 MHz)
-#define TXDELAY 100                        // Number of 6.7ms delay cycles (send flags)
+#define TXDELAY 100                      // Number of 6.7ms delay cycles (send flags)
 
 // Global variables
 static unsigned short    crc;
@@ -60,7 +60,7 @@ extern void ax25sendHeader(void)
 * ABSTRACT:    This function keys the transmitter, sends the source and
 *                destination address, and gets ready to send the actual data.
 *
-* INPUT:        None
+* INPUT:     None
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -143,7 +143,7 @@ extern void ax25sendHeader(void)
     ax25sendByte(0xF0);                        // Protocol ID - 0xF0 is no layer 3
 */
 
-    ax25sendEEPROMString(0);                // Send the header for use on 144.39 MHz
+    ax25sendEEPROMString(0);                   // Send the header for use on 144.39 MHz
 //    ax25sendEEPROMString(31);                // Trimmed header for use in 144.34 MHz
     return;
 
@@ -156,7 +156,7 @@ extern void ax25sendFooter(void)
 * ABSTRACT:    This function closes out the packet with the check-sum and a
 *                final flag.
 *
-* INPUT:        None
+* INPUT:     None
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -164,9 +164,9 @@ extern void ax25sendFooter(void)
     static unsigned char    crchi;
 
     crchi = (crc >> 8)^0xFF;
-    ax25sendByte(crc^0xFF);                 // Send the low byte of the crc
+    ax25sendByte(crc^0xFF);                  // Send the low byte of the crc
     ax25sendByte(crchi);                     // Send the high byte of the crc
-    ax25sendByte(0x7E);                          // Send a flag to end the packet
+    ax25sendByte(0x7E);                      // Send a flag to end the packet
     return;
 
 }        // End ax25sendFooter(void)
@@ -177,49 +177,49 @@ extern void ax25sendByte(unsigned char txbyte)
 /*******************************************************************************
 * ABSTRACT:    This function sends one byte by toggling the "tone" variable.
 *
-* INPUT:        txbyte    The byte to transmit
+* INPUT:     txbyte    The byte to transmit
 * OUTPUT:    None
 * RETURN:    None
 */
 {
     static char    loop;
     static char    bitbyte;
-    static int    bit_zero;
+    static int     bit_zero;
     static unsigned char    sequential_ones;
 
-    bitbyte = txbyte;                            // Bitbyte will be rotated through
+    bitbyte = txbyte;                      // Bitbyte will be rotated through
 
-    for (loop = 0 ; loop < 8 ; loop++)    // Loop for eight bits in the byte
+    for (loop = 0 ; loop < 8 ; loop++)     // Loop for eight bits in the byte
     {
-        bit_zero = bitbyte & 0x01;            // Set aside the least significant bit
+        bit_zero = bitbyte & 0x01;         // Set aside the least significant bit
 
-        if (txbyte == 0x7E)                    // Is the transmit character a flag?
+        if (txbyte == 0x7E)                // Is the transmit character a flag?
         {
-            sequential_ones = 0;                // it is immune from sequential 1's
+            sequential_ones = 0;           // it is immune from sequential 1's
         }
-        else                                        // The transmit character is not a flag
+        else                              // The transmit character is not a flag
         {
-            (ax25crcBit(bit_zero));            // So modify the checksum
+            (ax25crcBit(bit_zero));        // So modify the checksum
         }
 
-        if (!(bit_zero))                        // Is the least significant bit low?
+        if (!(bit_zero))                   // Is the least significant bit low?
         {
-            sequential_ones = 0;                // Clear the number of ones we have sent
+            sequential_ones = 0;           // Clear the number of ones we have sent
             txtone = (txtone == MARK)? SPACE : MARK; // Toggle transmit tone
         }
-        else                                        // Else, least significant bit is high
+        else                               // Else, least significant bit is high
         {
             if (++sequential_ones == 5)    // Is this the 5th "1" in a row?
             {
-                mainDelay(BIT_DELAY);        // Go ahead and send it
+                mainDelay(BIT_DELAY);      // Go ahead and send it
                 txtone = (txtone == MARK)? SPACE : MARK; // Toggle transmit tone
-                sequential_ones = 0;            // Clear the number of ones we have sent
+                sequential_ones = 0;       // Clear the number of ones we have sent
             }
 
         }
 
-        bitbyte >>= 1;                            // Shift the reference byte one bit right
-        mainDelay(BIT_DELAY);                // Pause for the bit to be sent
+        bitbyte >>= 1;                     // Shift the reference byte one bit right
+        mainDelay(BIT_DELAY);              // Pause for the bit to be sent
     }
 
     return;
@@ -232,7 +232,7 @@ extern void ax25crcBit(int lsb_int)
 /*******************************************************************************
 * ABSTRACT:    This function takes the latest transmit bit and modifies the crc.
 *
-* INPUT:        lsb_int    An integer with its least significant bit set of cleared
+* INPUT:     lsb_int    An integer with its least significant bit set of cleared
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -240,11 +240,11 @@ extern void ax25crcBit(int lsb_int)
     static unsigned short    xor_int;
 
     xor_int = crc ^ lsb_int;                // XOR lsb of CRC with the latest bit
-    crc >>= 1;                                    // Shift 16-bit CRC one bit to the right
+    crc >>= 1;                              // Shift 16-bit CRC one bit to the right
 
-    if (xor_int & 0x0001)                    // If XOR result from above has lsb set
+    if (xor_int & 0x0001)                   // If XOR result from above has lsb set
     {
-        crc ^= 0x8408;                            // Shift 16-bit CRC one bit to the right
+        crc ^= 0x8408;                      // Shift 16-bit CRC one bit to the right
     }
 
     return;
@@ -258,7 +258,7 @@ extern void ax25sendASCIIebyte(unsigned short value)
 * ABSTRACT:    This function sends an unsigned "extended" byte using ASCII.
 *                "Extended" means that it is 10-bits only (values up to 999.)
 *
-* INPUT:        value        The "ebyte" to be converted into ASCII and sent.
+* INPUT:     value        The "ebyte" to be converted into ASCII and sent.
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -293,7 +293,7 @@ extern void ax25sendString(unsigned char *address)
 /*******************************************************************************
 * ABSTRACT:    This function sends a null-terminated string to the packet
 *
-* INPUT:        *szString    Pointer to string to send
+* INPUT:     *szString    Pointer to string to send
 * OUTPUT:    None
 * RETURN:    None
 */
@@ -315,7 +315,7 @@ extern void ax25sendEEPROMString(unsigned int address)
 * ABSTRACT:    This function sends a null-terminated string found in EEPROM
 *                at the address given
 *
-* INPUT:        address    Starting address for the string
+* INPUT:     address    Starting address for the string
 * OUTPUT:    None
 * RETURN:    None
 */
