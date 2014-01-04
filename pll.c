@@ -10,7 +10,7 @@ void pll_set_freq(pll_dev_t *device, uint32_t frequency)
 {
     uint32_t divider;
 
-    divider = frequency / 25000;
+    divider = frequency / 25000 + 1;
 
     lm7001_prepare_data(&device->lm7001_dev, divider, LM7001_PLL_BAND_B0, LM7001_PLL_FREF_25KHZ, LM7001_PLL_INTYPE_FMIN);
     lm7001_wrire(&device->lm7001_dev);
