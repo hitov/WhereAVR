@@ -151,7 +151,9 @@ extern int    main(void)
         Delay(50);            // 18.0 ms between servo pulses
         WatchdogReset();
     }
+
 */
+
     // Initialization complete - system ready.  Run program loop indefinitely.
     while (TRUE)
     {
@@ -238,7 +240,7 @@ extern void mainTransmit(void)
 
     APRS_PTT_ON();                                // Enable TX
     pll_set_freq(&pll, 144800000);                // Set PLL frequency in kHz
-
+    Delay(500);
     transmit = TRUE;                              // Enable the transmitter
     ax25sendHeader();                             // Send APRS header
     return;
