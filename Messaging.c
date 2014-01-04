@@ -40,12 +40,15 @@ Copyright:    (c) 2005, Gary N. Dion (me@garydion.com). All rights reserved.
 #define    GPGGA        (2)
 
 static unsigned char    Time[7];             // UTC time in HHMMSS format
+static unsigned char    Date[7];             // Date in DDMMYY format
 static unsigned char    Latitude[10];        // Latitude in DDMM.MMMM format
 static unsigned char    Longitude[11];       // Longitude in DDDMM.MMMM format
 static unsigned char    Altitude[8];         // Altitude (meters) in MMM.MMM format
 static unsigned char    Speed[6];            // Speed (knots) in kkk.kk format
 static unsigned char    Course[6];           // Track angle (degrees) in ddd.dd format
 static unsigned char    Satellites[3];       // Number of Satellites tracked
+static unsigned char    Timestamp[7];        // APRS timestamp in DDHHMM format
+
 
 // Temporary variables used for decoding. Note: Time_Temp[7] is in the .h file.
 static unsigned char    Latitude_Temp[10];
@@ -54,6 +57,7 @@ static unsigned char    Altitude_Temp[8];
 static unsigned char    Speed_Temp[6];
 static unsigned char    Course_Temp[6];
 static unsigned char    Satellites_Temp[3];
+static unsigned char    Date_Temp[10];
 
 static unsigned char    Altifeet[7];        // Altitude (feet) in FFFFFF format
 
@@ -100,6 +104,19 @@ extern void MsgPrepare(void)
     for (index = 0; index < 6 ; index++)       // Grab latest Time
         Time[index] = Time_Temp[index];
     Time[index] = 0;                           // Terminate string
+
+    for (index = 0; index < 6 ; index++)       // Grab latest Date
+        Date[index] = Date_Temp[index];
+    Date[index] = 0;
+
+    // Prepare APRS timestamp
+    Timestamp[0] = Date[0];
+    Timestamp[1] = Date[1];
+    Timestamp[2] = Time[0];
+    Timestamp[3] = Time[1];
+    Timestamp[4] = Time[2];
+    Timestamp[5] = Time[3];
+    Timestamp[6] = 0;
 
     for (index = 0; index < 9 ; index++)       // Grab latest Latitude
         Latitude[index] = Latitude_Temp[index];
@@ -179,8 +196,12 @@ extern void MsgSendPos(void)
 * RETURN:    None
 */
 {
+    if((Timestamp[0] == 0)     ||
+       (Latitude[0] == 0)      ||
+       (Longitude[0]) == 0) return;
+
     ax25sendByte('@');                       // The "@" Symbol means time stamp first
-    ax25sendString(Time);                    // Send the time
+    ax25sendString(Timestamp);               // Send the timestamp
     ax25sendByte('z');                       // Tag it as zulu
     Latitude[7] = 0;                         // Truncate Latitude past 7th character
     ax25sendString(Latitude);                // Send it
@@ -188,8 +209,8 @@ extern void MsgSendPos(void)
     ax25sendByte('/');                       // Symbol Table Identifier
     Longitude[8] = 0;                        // Truncate Longitude past 8th character
     ax25sendString(Longitude);               // Send it
-    ax25sendByte('W');                       // As degrees West
-    ax25sendByte('O');                       // Symbol Code for a balloon icon
+    ax25sendByte('E');                       // As degrees East
+    ax25sendByte('[');                       // Symbol Code
     Course[3] = 0;                           // Truncate course at 3 characters
     ax25sendString(Course);                  // Transmit Course
     ax25sendByte('/');                       // Just a separator with no meaning
@@ -407,6 +428,9 @@ extern void MsgHandler(unsigned char newchar)
                 return;
             case (8):                                    // Course field, grab characters
                 Course_Temp[index++] = newchar;
+                return;
+            case (9):                                    // Date field, grab characters
+                Date_Temp[index++] = newchar;
                 return;
         }
 
