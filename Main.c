@@ -353,7 +353,7 @@ extern void Delay(unsigned char timeout)
 
 
 /******************************************************************************/
-SIGNAL(SIG_OVERFLOW0)
+ISR(TIMER0_OVF_vect)
 /*******************************************************************************
 * ABSTRACT:    This routine now decodes packets by sampling the state of
 *                rxtoggled, and assembling a packet if toggles occur.  A checksum is
@@ -485,7 +485,7 @@ SIGNAL(SIG_OVERFLOW0)
 
 
 /******************************************************************************/
-SIGNAL(SIG_OVERFLOW2)
+ISR(TIMER2_OVF_vect)
 /*******************************************************************************
 * ABSTRACT:    This function handles the counter2 overflow interrupt.
 *                Counter2 is used to generate a sine wave using resistors on
@@ -526,7 +526,7 @@ SIGNAL(SIG_OVERFLOW2)
 
 
 /******************************************************************************/
-SIGNAL(SIG_COMPARATOR)
+ISR(ANA_COMP_vect)
 /*******************************************************************************
 * ABSTRACT:    This function handles the comparator interrupt.  Interrupts are
 *                disabled during TCNT1 access to prevent 16-bit corruption.

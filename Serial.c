@@ -137,7 +137,7 @@ extern void     Serial_Processes(void)
 
 
 /******************************************************************************/
-SIGNAL(SIG_UART_RECV)
+ISR(USART_RXC_vect)
 /*******************************************************************************
 * ABSTRACT:    Called by the receive ISR (interrupt). Saves the next serial
 *                byte to the head of the RX buffer.
@@ -155,7 +155,7 @@ SIGNAL(SIG_UART_RECV)
 
 
 /******************************************************************************/
-SIGNAL(SIG_UART_TRANS)
+ISR(USART_TXC_vect)
 /*******************************************************************************
 * ABSTRACT:    Called by the transmit ISR (interrupt). Puts the next serial
 *                byte into the TX register.

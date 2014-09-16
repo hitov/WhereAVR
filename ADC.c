@@ -64,7 +64,7 @@ extern unsigned short    ADCGet(unsigned char chan)
 
 
 /******************************************************************************/
-SIGNAL(SIG_ADC)
+ISR(ADC_vect)
 /*******************************************************************************
 * ABSTRACT:    This function handles the ADC interrupt.  The Mux channel and
 *                array index are offset one channel due to the way the ADC works.
