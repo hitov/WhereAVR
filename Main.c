@@ -234,13 +234,16 @@ extern void mainTransmit(void)
 {
     UCSRB &= ~((1<<RXCIE)|(1<<TXCIE));            // Disable the serial interrupts
     ACSR &= ~(1<<ACIE);                           // Disable the comparator
+
+    APRS_PTT_ON();                                // Enable TX
+    pll_set_freq(&pll, 144800000);                // Set PLL frequency in kHz
+    Delay(250);
+    Delay(250);    
+
     TCCR0 = 0x03;                                 // Timer0 clock prescale of 64
     TCCR1B = 0x02;                                // Timer1 clock prescale of 8
     TCCR2 = 0x02;                                 // Timer2 clock prescale of 8
 
-    APRS_PTT_ON();                                // Enable TX
-    pll_set_freq(&pll, 144800000);                // Set PLL frequency in kHz
-    Delay(500);
     transmit = TRUE;                              // Enable the transmitter
     ax25sendHeader();                             // Send APRS header
     return;
